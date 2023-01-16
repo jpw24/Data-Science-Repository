@@ -2,7 +2,8 @@ import pandas as pd
 import sklearn as sklearn
 from sklearn.model_selection import train_test_split,TimeSeriesSplit
 from sklearn.tree import DecisionTreeClassifier
-import matplotlib
+from sklearn.metrics import precision_score,recall_score,f1_score
+from matplotlib import pyplot as plt
 import scipy.stats as stats
 pointbiserialr=stats.pointbiserialr
 
@@ -30,8 +31,8 @@ for train_index, test_index in tss.split(X):
     X_train, X_test = X.iloc[train_index, :], X.iloc[test_index,:]
     y_train, y_test = Y.iloc[train_index], Y.iloc[test_index]
 
-y_train.groupby('Time').mean().plot()
-y_test.groupby('Time').mean().plot()
+# y_train.groupby('Time').mean().plot()
+# y_test.groupby('Time').mean().plot()
 
 
 ###BEGIN FEATURE SELECTION/ENGINEERING
@@ -66,6 +67,8 @@ corr_top_features_df = pd.DataFrame(corr_top_features, columns=['Feature'])
 corr_top_features_df['Method'] = 'Correlation'
 corr_data.tail(20)
 
+
+####MODEL TYPE: DECISION TREE
 ##Now time to train a decision tree model
 ##Not going to do any cross validation yet until I work on tuning the hyperparameters using grid search
 regressor = DecisionTreeClassifier()
@@ -79,19 +82,63 @@ score = regressor.score(X_test[corr_top_features], y_test)
 print(score)
 
 # List of values to try for max_depth:
-max_depth_range = list(range(1, 6))
+max_depth_range = list(range(1, 10))
 # List to store the accuracy for each value of max_depth:
 accuracy = []
+precision=[]
+recall=[]
+f1=[]
 for depth in max_depth_range:
     clf = DecisionTreeClassifier(max_depth=depth,
                                  random_state=0)
-    clf.fit(X_train, y_train)
-    score = clf.score(X_test, y_test)
+    clf.fit(X_train[corr_top_features], y_train)
+    y_pred=clf.predict(X_test[corr_top_features])
+    score = clf.score(X_test[corr_top_features], y_test)
     accuracy.append(score)
-for depth in max_depth_range:
-    print(depth)
-    print(accuracy[depth-1])
+    precision.append(precision_score(y_test,y_pred))
+    recall.append(recall_score(y_test,y_pred))
+    f1.append(f1_score(y_test,y_pred))
 
+max_f1=0
+best_depth=0
+for depth in max_depth_range:
+    print("Depth")
+    print(depth)
+    print("Accuracy")
+    print(accuracy[depth-1])
+    print("Precision")
+    print(precision[depth-1])
+    print("Recall")
+    print(recall[depth-1])
+    print("F1")
+    print(f1[depth-1])
+    if f1[depth-1]>max_f1:
+        best_depth=depth
+        max_f1=f1[depth-1]
+print("Best Depth")
+print(best_depth)
+print("Best F1")
+print(max_f1)
+
+
+##Plot on a graph
+plt.plot(max_depth_range,accuracy, label="Accuracy")
+plt.plot(max_depth_range,precision, label="Precision")
+plt.plot(max_depth_range,recall, label="Recall")
+plt.plot(max_depth_range,f1, label="F1")
+plt.legend()
+
+# y_test.groupby('Time').mean().plot()
 
 ####NEED TO WORK ON SAMPLING FOR CLASS IMBALANCE:
 ##https://medium.com/p/8f63474ff8c7
+####GOING TO USE THE SMOTE TECHNIQUE TO HANDLE THE CLASS IMBALANCE, MAY NOT BE NECESSARY FOR DECISION TREES
+
+
+
+
+##NOTE that because we want fewer false negatives than false positives, we should prioritize RECALL
+
+
+
+####MODEL TYPE: _____________________
