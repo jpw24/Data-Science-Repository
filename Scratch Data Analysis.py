@@ -137,8 +137,13 @@ plt.legend()
 
 
 
+
+
 ##NOTE that because we want fewer false negatives than false positives, we should prioritize RECALL
 
+###READ NEXT:
+####https://medium.com/illumination/the-ultimate-data-science-portfolio-f52a4b3a9934
+####https://heliosaditya.medium.com/everything-i-needed-to-know-to-become-a-job-ready-data-scientist-3dcfe00f5c77
 
 
 ####MODEL TYPE: _____________________
