@@ -2,10 +2,18 @@ import pandas as pd
 import sklearn as sklearn
 from sklearn.model_selection import train_test_split,TimeSeriesSplit
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import precision_score,recall_score,f1_score
+from sklearn.metrics import precision_score,recall_score,f1_score,classification_report
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+# Oversampling and under sampling
+from imblearn.over_sampling import RandomOverSampler, SMOTE
+from imblearn.under_sampling import RandomUnderSampler, NearMiss
+from collections import Counter
 from matplotlib import pyplot as plt
 import scipy.stats as stats
 pointbiserialr=stats.pointbiserialr
+
 
 fraud_df=pd.read_csv(r"C:\Users\jimmyw\Documents\Data-Science-Repository\Potential Data Sets\Credit Card Fraud.csv")
 
@@ -122,11 +130,11 @@ print(max_f1)
 
 
 ##Plot on a graph
-plt.plot(max_depth_range,accuracy, label="Accuracy")
-plt.plot(max_depth_range,precision, label="Precision")
-plt.plot(max_depth_range,recall, label="Recall")
-plt.plot(max_depth_range,f1, label="F1")
-plt.legend()
+# plt.plot(max_depth_range,accuracy, label="Accuracy")
+# plt.plot(max_depth_range,precision, label="Precision")
+# plt.plot(max_depth_range,recall, label="Recall")
+# plt.plot(max_depth_range,f1, label="F1")
+# plt.legend()
 
 # y_test.groupby('Time').mean().plot()
 
@@ -135,8 +143,38 @@ plt.legend()
 ####GOING TO USE THE SMOTE TECHNIQUE TO HANDLE THE CLASS IMBALANCE, MAY NOT BE NECESSARY FOR DECISION TREES
 
 
+##create baseline random forest model
+
+rf= RandomForestClassifier()
+baseline_model = rf.fit(X_train[corr_top_features],y_train)
+baseline_prediction=baseline_model.predict(X_test[corr_top_features])
+print(classification_report(y_test,baseline_prediction))
 
 
+##SMOTE CREATION
+smote=SMOTE(random_state=34)
+X_train_smote,y_train_smote=smote.fit_resample(X_train[corr_top_features],y_train)
+print(sorted(Counter(y_train_smote).items()))
+
+rf_smote=RandomForestClassifier()
+smote_model=rf_smote.fit(X_train_smote,y_train_smote)
+smote_prediction = smote_model.predict(X_test[corr_top_features])
+
+print(classification_report(y_test,smote_prediction))
+
+##GBM
+gb_smote=GradientBoostingClassifier()
+gb_smote_model=gb_smote.fit(X_train_smote,y_train_smote)
+gb_smote_prediction=gb_smote_model.predict(X_test[corr_top_features])
+
+##Logistic Regression
+
+##K Nearest Neighbors
+
+##
+
+
+##
 
 
 ##NOTE that because we want fewer false negatives than false positives, we should prioritize RECALL
