@@ -3,6 +3,7 @@ import sklearn as sklearn
 from sklearn.model_selection import train_test_split,TimeSeriesSplit
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import precision_score,recall_score,f1_score,classification_report
+from sklearn.linear_model import LogisticRegression
 from sklearn.datasets import make_classification
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
@@ -168,7 +169,11 @@ gb_smote_model=gb_smote.fit(X_train_smote,y_train_smote)
 gb_smote_prediction=gb_smote_model.predict(X_test[corr_top_features])
 
 ##Logistic Regression
+logistic_smote=LogisticRegression()
+logistic_smote_model=logistic_smote.fit(X_train_smote,y_train_smote)
+logistic_smote_prediction=logistic_smote_model.predict(X_test[corr_top_features])
 
+print(classification_report(y_test,logistic_smote_prediction))
 ##K Nearest Neighbors
 
 ##
