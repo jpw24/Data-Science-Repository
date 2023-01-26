@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import sklearn as sklearn
 from sklearn.model_selection import train_test_split,TimeSeriesSplit
@@ -13,7 +14,16 @@ from imblearn.under_sampling import RandomUnderSampler, NearMiss
 from collections import Counter
 from matplotlib import pyplot as plt
 import scipy.stats as stats
+from sklearn.neighbors import KNeighborsClassifier
+import numpy as np
 pointbiserialr=stats.pointbiserialr
+
+
+###SQL CODE WOULD BE:
+# sql_credentials="://__________:"
+# fraud_df=pd.read_sql("""
+#         SELECT * FROM CREDIT_CARD_FRAUD
+#         """,con=sql_credentials)
 
 
 fraud_df=pd.read_csv(r"C:\Users\jimmyw\Documents\Data-Science-Repository\Potential Data Sets\Credit Card Fraud.csv")
@@ -174,13 +184,29 @@ logistic_smote_model=logistic_smote.fit(X_train_smote,y_train_smote)
 logistic_smote_prediction=logistic_smote_model.predict(X_test[corr_top_features])
 
 print(classification_report(y_test,logistic_smote_prediction))
+
+
 ##K Nearest Neighbors
+neighbors=np.arange(1,25)
+train_accuracy=np.empty(len(neighbors))
+test_accuracy=np.empty(len(neighbors))
+for i,k in enumerate(neighbors):
+    ##n_jobs=-1 means the computer should use all possible computers in parallel processing
+    knn=KNeighborsClassifier(n_neighbors=k,algorithm="kd_tree",n_jobs=-1)
+    knn.fit(X_train_smote,y_train_smote)
+    train_accuracy[i]=knn.score(X_train_smote,y_train_smote)
+    test_accuracy[i]=knn.score(X_test[corr_top_features],y_test)
+print(train_accuracy)
+print(test_accuracy)
+
+##NOT done with KNN
+
+####https://www.kaggle.com/code/maneesha96/fraud-detection-in-transaction-data-using-knn
 
 ##
 
 
-##
-
+##https://www.kaggle.com/code/maneesha96/fraud-detection-in-transaction-data-using-knn
 
 ##NOTE that because we want fewer false negatives than false positives, we should prioritize RECALL
 
