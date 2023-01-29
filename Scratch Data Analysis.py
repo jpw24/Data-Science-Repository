@@ -16,8 +16,6 @@ from matplotlib import pyplot as plt
 import scipy.stats as stats
 from sklearn.neighbors import KNeighborsClassifier
 import numpy as np
-pointbiserialr=stats.pointbiserialr
-
 
 ###SQL CODE WOULD BE:
 # sql_credentials="://__________:"
@@ -59,6 +57,7 @@ for train_index, test_index in tss.split(X):
 #getting correlation matrix; use point_bi_serial_list because target is categorical and features are continuous
 point_bi_serial_list=X_train
 point_bi_serial_threshold = .2
+pointbiserialr=stats.pointbiserialr
 corr_data=pd.DataFrame()
 for i in point_bi_serial_list:
     pbc=pointbiserialr(y_train,X_train[i])
