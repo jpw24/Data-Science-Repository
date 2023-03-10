@@ -114,7 +114,7 @@ corr_data=pd.merge(corr_data,threshold_df,on=["Correlation_Type"],how="left")
 corr_data2 = corr_data.loc[corr_data['Correlation'].abs() > corr_data['Threshold']]
 corr_top_features = corr_data2['Feature'].tolist()
 
-corr_top_features
+print(corr_top_features)
 
 # corr_train=X_train_standardized
 # fraud_df.columns
@@ -123,6 +123,8 @@ fraud_df_subset=fraud_df[standardized_cols]
 rs=RobustScaler()
 fraud_df_subset_scaled=rs.fit_transform(fraud_df_subset)
 fraud_df_standardized=fraud_df
+fraud_df_standardized[standardized_cols]=fraud_df_subset_scaled
+
 
 class_nf = fraud_df_standardized[fraud_df_standardized['Class'] == 0]
 class_f = fraud_df_standardized[fraud_df_standardized['Class'] == 1]
@@ -132,7 +134,108 @@ for feature in corr_top_features:
     plt.xticks([0,1], ["Not fraud", "Fraud"])
     plt.ylim(-25,5)
     plt.show()
-fraud_df_standardized[standardized_cols]=fraud_df_subset_scaled
 
 
-##Add more code later - condensed version only!!
+
+############################################################
+# Step 4. Baseline Model Development
+############################################################
+
+model_scores={}
+####MODEL TYPE: DECISION TREE
+##Now time to train a decision tree model
+##Not going to do any cross validation yet until I work on tuning the hyperparameters using grid search
+decision_tree = DecisionTreeClassifier()
+decision_tree.fit(X_train_standardized[corr_top_features], y_train)
+
+y_pred = decision_tree.predict(X_test_standardized[corr_top_features])
+model_df = pd.DataFrame({'Real Values':y_test, 'Decision Tree Predicted Values':y_pred})
+
+# The score method returns the accuracy of the model
+score = decision_tree.score(X_test_standardized[corr_top_features], y_test)
+model_scores['Decision Tree']={'Accuracy':score}
+print(score)
+
+
+####MODEL TYPE: Logistic Regression
+logistic=LogisticRegression()
+logistic.fit(X_train_standardized[corr_top_features], y_train)
+
+y_pred = logistic.predict(X_test_standardized[corr_top_features])
+model_df['Logistic Predicted Values']=y_pred
+score=logistic.score(X_test_standardized[corr_top_features],y_test)
+model_scores['Logistic Regression']={'Accuracy':score}
+print(score)
+
+####MODEL TYPE: Support Vector Machine
+svm_model=svm.SVC(kernel='linear')
+svm_model.fit(X_train_standardized[corr_top_features],y_train)
+
+y_pred = svm_model.predict(X_test_standardized[corr_top_features])
+model_df['SVM Predicted Values']=y_pred
+score=svm_model.score(X_test_standardized[corr_top_features],y_test)
+model_scores['SVM']={'Accuracy':score}
+print(score)
+
+
+##Write Function
+def CV_report(n_folds,model):
+    tscv = TimeSeriesSplit(n_splits=n_folds)
+    scores_accuracy=cross_val_score(model,X,y,cv=tscv)
+    scores_precision=cross_val_score(model,X,y,cv=tscv,scoring='precision')
+    scores_recall=cross_val_score(model,X,y,cv=tscv,scoring='recall')
+    scores_f1=cross_val_score(model,X,y,cv=tscv,scoring='f1')
+    performance_metrics={'Accuracy':
+                         {'Mean':scores_accuracy.mean(),
+                          'Standard Deviation':scores_accuracy.std()},
+                        'Precision':
+                         {'Mean':scores_precision.mean(),
+                          'Standard Deviation':scores_precision.std()},
+                        'Recall':
+                         {'Mean':scores_recall.mean(),
+                          'Standard Deviation':scores_recall.std()},
+                        'F1':
+                         {'Mean':scores_f1.mean(),
+                         'Standard Deviation':scores_f1.std()}
+                                  }
+    return performance_metrics
+
+
+##Decision Tree Cross Validation Report
+cv_decision_tree=DecisionTreeClassifier()
+d_tree_report=CV_report(5,cv_decision_tree)
+print(d_tree_report)
+##Logistic Regression Cross Validation Report
+cv_logistic=LogisticRegression()
+logistic_report=CV_report(5,cv_logistic)
+print(logistic_report)
+##Support Vector Machine Cross Validation Report
+cv_svm=svm.SVC(kernel='linear')
+svm_report=CV_report(5,cv_svm)
+print(svm_report)
+
+
+
+###setting up performance charts
+accuracy_numbers=[d_tree_report['Accuracy']['Mean'],logistic_report['Accuracy']['Mean'],svm_report['Accuracy']['Mean']]
+precision_numbers=[d_tree_report['Precision']['Mean'],logistic_report['Precision']['Mean'],svm_report['Precision']['Mean']]
+recall_numbers=[d_tree_report['Recall']['Mean'],logistic_report['Recall']['Mean'],svm_report['Recall']['Mean']]
+F1_numbers=[d_tree_report['F1']['Mean'],logistic_report['F1']['Mean'],svm_report['F1']['Mean']]
+
+
+
+fig,ax=plt.subplots()
+
+ax.bar(range(3),accuracy_numbers,label="Accuracy")
+ax.bar(range(3),precision_numbers,label="Precision")
+ax.bar(range(3),recall_numbers,label="Recall")
+ax.bar(range(3),F1_numbers,label="F1")
+
+labels=['Decision Tree','Logistic Regression','Support Vector Machine']
+
+plt.xticks(range(len(labels)),labels)
+plt.xlabel('Model Types')
+plt.ylabel('Values')
+plt.title("model Performance Metrics")
+plt.legend()
+pt.show()
