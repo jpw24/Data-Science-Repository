@@ -167,17 +167,6 @@ score=logistic.score(X_test_standardized[corr_top_features],y_test)
 model_scores['Logistic Regression']={'Accuracy':score}
 print(score)
 
-####MODEL TYPE: Support Vector Machine
-svm_model=svm.SVC(kernel='linear')
-svm_model.fit(X_train_standardized[corr_top_features],y_train)
-
-y_pred = svm_model.predict(X_test_standardized[corr_top_features])
-model_df['SVM Predicted Values']=y_pred
-score=svm_model.score(X_test_standardized[corr_top_features],y_test)
-model_scores['SVM']={'Accuracy':score}
-print(score)
-
-
 ##Write Function
 def CV_report(n_folds,model):
     tscv = TimeSeriesSplit(n_splits=n_folds)
@@ -209,33 +198,55 @@ print(d_tree_report)
 cv_logistic=LogisticRegression()
 logistic_report=CV_report(5,cv_logistic)
 print(logistic_report)
-##Support Vector Machine Cross Validation Report
-cv_svm=svm.SVC(kernel='linear')
-svm_report=CV_report(5,cv_svm)
-print(svm_report)
-
-
 
 ###setting up performance charts
-accuracy_numbers=[d_tree_report['Accuracy']['Mean'],logistic_report['Accuracy']['Mean'],svm_report['Accuracy']['Mean']]
-precision_numbers=[d_tree_report['Precision']['Mean'],logistic_report['Precision']['Mean'],svm_report['Precision']['Mean']]
-recall_numbers=[d_tree_report['Recall']['Mean'],logistic_report['Recall']['Mean'],svm_report['Recall']['Mean']]
-F1_numbers=[d_tree_report['F1']['Mean'],logistic_report['F1']['Mean'],svm_report['F1']['Mean']]
+accuracy_numbers=[d_tree_report['Accuracy']['Mean'],logistic_report['Accuracy']['Mean']]
+precision_numbers=[d_tree_report['Precision']['Mean'],logistic_report['Precision']['Mean']]
+recall_numbers=[d_tree_report['Recall']['Mean'],logistic_report['Recall']['Mean']]
+F1_numbers=[d_tree_report['F1']['Mean'],logistic_report['F1']['Mean']]
 
+model_types = ('Decision Tree','Logistic Regression')
+performance_metrics = {
+    'Accuracy': accuracy_numbers,
+    'Precision': precision_numbers,
+    'Recall': recall_numbers,
+    'F1': F1_numbers
+}
+x = np.arange(len(model_types))  # the label locations
+width = 0.2  # the width of the bars
+multiplier = 0
 
+plt.figure(1)
+fig, ax = plt.subplots(layout='constrained')
 
-fig,ax=plt.subplots()
+for attribute, value in performance_metrics.items():
+    offset = width * multiplier
+    rects = ax.bar(x + offset, value, width, label=attribute)
+    ax.bar_label(rects, padding=4)
+    multiplier += 1
 
-ax.bar(range(3),accuracy_numbers,label="Accuracy")
-ax.bar(range(3),precision_numbers,label="Precision")
-ax.bar(range(3),recall_numbers,label="Recall")
-ax.bar(range(3),F1_numbers,label="F1")
+# Add some text for labels, title and custom x-axis tick labels, etc.
+ax.set_ylabel('Performance Metrics Value')
+ax.set_title('Model Performance by Model Types')
+ax.set_xticks(x + width, model_types)
+ax.legend(loc='upper left', ncols=4)
+ax.set_ylim(0, 1.2)
 
-labels=['Decision Tree','Logistic Regression','Support Vector Machine']
+plt.show()
+plt.savefig('Model Performance by Model Types.png')
 
-plt.xticks(range(len(labels)),labels)
-plt.xlabel('Model Types')
-plt.ylabel('Values')
-plt.title("model Performance Metrics")
-plt.legend()
-pt.show()
+###Explaining feature importance
+fig2,axes2=plt.subplots(nrows=1,ncols=2)
+explainer=shap.TreeExplainer(decision_tree)
+# shap_values=explainer.shap_values(X_test_standardized[corr_top_features])
+shap.summary_plot(X_test_standardized[corr_top_features], y_train)
+plt.tight_layout()
+plt.show()
+# axes.shap_summary(shap_values)
+#
+# print(shap_values)
+#
+# shap_summary=
+# shap_summary.show()
+# for i in range(len(shap_values)):
+#     shap.force_plot(explainer.expected_value, shap_values[i], X_test_standardized[corr_top_features].iloc[i,:], feature_names = X_test_standardized[corr_top_features].columns)
