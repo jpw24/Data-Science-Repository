@@ -14,6 +14,7 @@
       <change afterPath="$PROJECT_DIR$/Visualizations/V7 Relationship with Target.png" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/Visualizations/initial_decision_tree.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Fraud Detection Python and SQL.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Fraud Detection Python and SQL.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Model Performance by Model Types.png" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/feature_importance_waterfall.png" beforeDir="false" />
     </list>
@@ -49,6 +50,7 @@
 }</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\jimmyw\Documents\Fraud-Detection-Project" />
       <recent name="C:\Users\jimmyw\Documents\Fraud-Detection-Project\Visualizations" />
     </key>
   </component>
