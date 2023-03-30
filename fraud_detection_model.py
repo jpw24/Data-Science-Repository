@@ -15,6 +15,7 @@ import sklearn as sklearn
 from sklearn import svm
 from sklearn.model_selection import train_test_split,KFold,TimeSeriesSplit,cross_val_score
 from sklearn.tree import DecisionTreeClassifier
+from sklearn import tree
 from sklearn.metrics import precision_score,recall_score,f1_score,classification_report
 from sklearn.linear_model import LogisticRegression
 from sklearn.datasets import make_classification
@@ -212,6 +213,8 @@ performance_metrics = {
     'Recall': recall_numbers,
     'F1': F1_numbers
 }
+
+
 x = np.arange(len(model_types))  # the label locations
 width = 0.2  # the width of the bars
 multiplier = 0
@@ -235,18 +238,18 @@ ax.set_ylim(0, 1.2)
 plt.show()
 plt.savefig('Model Performance by Model Types.png')
 
-###Explaining feature importance
-fig2,axes2=plt.subplots(nrows=1,ncols=2)
-explainer=shap.TreeExplainer(decision_tree)
-# shap_values=explainer.shap_values(X_test_standardized[corr_top_features])
-shap.summary_plot(X_test_standardized[corr_top_features], y_train)
-plt.tight_layout()
-plt.show()
-# axes.shap_summary(shap_values)
-#
-# print(shap_values)
-#
-# shap_summary=
-# shap_summary.show()
-# for i in range(len(shap_values)):
-#     shap.force_plot(explainer.expected_value, shap_values[i], X_test_standardized[corr_top_features].iloc[i,:], feature_names = X_test_standardized[corr_top_features].columns)
+###Shapley values explain feature importance
+fig2,axes2=plt.subplots(nrows=1,ncols=1)
+
+explainer=shap.Explainer(decision_tree)
+shap_values=explainer(X_test_standardized[corr_top_features])
+##waterfall chart here
+_=shap.summary_plot(shap_values.data,X_test_standardized[corr_top_features])
+fig2.show()
+fig2.savefig("feature_importance_waterfall.png")
+
+
+fig1=plt.figure(figsize=(25,20))
+_=tree.plot_tree(decision_tree, max_depth=3,feature_names=corr_top_features,filled=True)
+fig1.show()
+fig1.savefig("initial_decision_tree.png")
