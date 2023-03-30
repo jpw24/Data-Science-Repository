@@ -1,5 +1,0 @@
-https://medium.com/analytics-vidhya/nlp-glossary-for-beginners-c3093529ee4
-
-https://medium.com/createdd-notes/introduction-to-natural-language-processing-with-python-294988dbae56
-
-https://www.kaggle.com/code/abhinand05/bert-for-humans-tutorial-baseline-version-2/notebook
