@@ -3,3 +3,8 @@
 .ideas.txt
 .fraud_detection_model.py
 .Scratch Data Analysis.py
+__pycache__
+.noteablekeep
+*.vectorized_metadata
+*.py[cod]
+*.vectorized_content
